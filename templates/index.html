@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>翻译流</title></head>
+<body>
+  <h2>实时翻译内容：</h2>
+  <div id="output"></div>
+  <script>
+    const eventSource = new EventSource("/stream");
+    eventSource.onmessage = function(event) {
+      const div = document.getElementById("output");
+      div.innerHTML += "<p>" + event.data + "</p>";
+    };
+  </script>
+</body>
+</html>
