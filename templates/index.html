@@ -2,14 +2,24 @@
 <html>
 <head><title>翻译流</title></head>
 <body>
-  <h2>实时翻译内容：</h2>
+  <h2>FOCUS Translation:</h2>
   <div id="output"></div>
-  <script>
-    const eventSource = new EventSource("/stream");
-    eventSource.onmessage = function(event) {
-      const div = document.getElementById("output");
-      div.innerHTML += "<p>" + event.data + "</p>";
-    };
-  </script>
+<!--  <script>-->
+<!--    const eventSource = new EventSource("/stream");-->
+<!--    eventSource.onmessage = function(event) {-->
+<!--      const div = document.getElementById("output");-->
+<!--      div.innerHTML += "<p>" + event.data + "</p>";-->
+<!--    };-->
+<!--  </script>-->
+
+<!--  Reverse the order, let the latest content be showed at the top-->
+<script>
+  const eventSource = new EventSource("/stream");
+  eventSource.onmessage = function(event) {
+    const div = document.getElementById("output");
+    div.innerHTML = "<p>" + event.data + "</p>" + div.innerHTML;
+  };
+</script>
+
 </body>
 </html>
