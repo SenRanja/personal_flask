@@ -1,25 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head><title>Translator</title></head>
-<body>
-  <h2>FOCUS Translation:</h2>
-  <div id="output"></div>
-<!--  <script>-->
-<!--    const eventSource = new EventSource("/stream");-->
-<!--    eventSource.onmessage = function(event) {-->
-<!--      const div = document.getElementById("output");-->
-<!--      div.innerHTML += "<p>" + event.data + "</p>";-->
-<!--    };-->
-<!--  </script>-->
+  <!DOCTYPE html>
+  <html>
+  <head><title>Translator</title></head>
+  <body>
+    <h2>FOCUS Translation:</h2>
+    <div id="output"></div>
+  <!--  <script>-->
+  <!--    const eventSource = new EventSource("/stream");-->
+  <!--    eventSource.onmessage = function(event) {-->
+  <!--      const div = document.getElementById("output");-->
+  <!--      div.innerHTML += "<p>" + event.data + "</p>";-->
+  <!--    };-->
+  <!--  </script>-->
 
-<!--  Reverse the order, let the latest content be showed at the top-->
-<script>
-  const eventSource = new EventSource("/stream");
-  eventSource.onmessage = function(event) {
-    const div = document.getElementById("output");
-    div.innerHTML = "<p>" + event.data + "</p>" + div.innerHTML;
-  };
-</script>
+  <!--  Reverse the order, let the latest content be showed at the top-->
+  <script>
+    const eventSource = new EventSource("/stream");
+    eventSource.onmessage = function(event) {
+      const div = document.getElementById("output");
+      div.innerHTML = "<p>" + event.data + "</p>" + div.innerHTML;
+    };
+  </script>
 
-</body>
-</html>
+  </body>
+  </html>

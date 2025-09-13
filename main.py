@@ -1,68 +1,53 @@
-# from flask import Flask, Response, render_template
-#
-# app = Flask(__name__)
-#
-# @app.route("/")
-# def index():
-#     return render_template("index.html")
-#
-# @app.route("/focus-translator-stream")
-# def stream():
-#     def event_stream():
-#         import time
-#         counter = 0
-#         while True:
-#             counter += 1
-#             yield f"data: 翻译结果 {counter}\n\n"
-#             time.sleep(1)
-#     return Response(event_stream(), mimetype="text/event-stream")
-#
-# if __name__ == "__main__":
-#     app.run(debug=True)
-
-
 from flask import Flask, Response, request, render_template
 import queue
-import time
+import threading
 
 app = Flask(__name__)
 
-# 用于存储外部传入的翻译文本
-message_queue = queue.Queue()
+# 保存所有订阅的客户端队列
+subscribers = []
+lock = threading.Lock()
+# log filename
+LOG_FILE = "messages.log"
 
+def publish_message(msg):
+    """广播消息到所有订阅者"""
+    with lock:
+        for q in subscribers:
+            q.put(msg)
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
 @app.route("/push", methods=["POST"])
 def push_message():
-    """外部程序通过 POST 提交翻译内容"""
-    text = request.form.get("text") or request.json.get("text")
+    text = request.form.get("text") or (request.json and request.json.get("text"))
     if text:
-        message_queue.put(text)
+        publish_message(text)
+
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(text + "\n")
+
         return {"status": "ok", "msg": text}
     return {"status": "error", "msg": "no text provided"}, 400
 
-
 @app.route("/stream")
 def stream():
-    """前端通过 SSE 获取实时翻译流"""
-    def event_stream():
-        while True:
-            try:
-                # 等待新消息（5 秒超时，避免阻塞过久）
-                msg = message_queue.get(timeout=5)
+    def event_stream(q):
+        try:
+            while True:
+                msg = q.get()  # 阻塞直到有消息
                 yield f"data: {msg}\n\n"
-            except queue.Empty:
-                # 保持连接，防止超时断开
-                yield ": keep-alive\n\n"
-                time.sleep(0.1)
+        except GeneratorExit:
+            # 客户端断开时自动退出
+            with lock:
+                subscribers.remove(q)
 
-    return Response(event_stream(), mimetype="text/event-stream")
-
+    q = queue.Queue()
+    with lock:
+        subscribers.append(q)
+    return Response(event_stream(q), mimetype="text/event-stream")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, threaded=True)
-
-
-
